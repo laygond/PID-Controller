@@ -14,22 +14,16 @@ class PID {
   virtual ~PID();
 
   /**
-   * Initialize PID.
+   * Initialize PID coefficients, errors, and set point
    * @param (Kp_, Ki_, Kd_) The initial PID coefficients
    */
   void Init(double Kp_, double Ki_, double Kd_);
 
   /**
-   * Update the PID error variables given cross track error.
+   * Updates for the PID error variables given cross track error.
    * @param cte The current cross track error
    */
-  void UpdateError(double cte);
-
-  /**
-   * Calculate the total PID error.
-   * @output The total PID error
-   */
-  double TotalError();
+  double Update(double cte);
 
  private:
   /**

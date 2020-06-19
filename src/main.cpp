@@ -31,14 +31,16 @@ string hasData(string s) {
 }
 
 int main() {
+  //Create hub instance to connect to simulator
   uWS::Hub h;
 
-  PID pid;
-  /**
-   * TODO: Initialize the pid variable.
-   */
+  // Initialize steering pid object
+  PID steering_controller;
+  double steer_Kp = 0.1, steer_Ki = 0.0001, steer_Kd = 1.0;
+  steering_controller.Init(steer_Kp, steer_Ki, steer_Kd);
 
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
+
+  h.onMessage([&steering_controller](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -53,21 +55,19 @@ int main() {
 
         if (event == "telemetry") {
           // j[1] is the data JSON object
+
+          // Read Feedback data
           double cte = std::stod(j[1]["cte"].get<string>());
           double speed = std::stod(j[1]["speed"].get<string>());
           double angle = std::stod(j[1]["steering_angle"].get<string>());
-          double steer_value;
-          /**
-           * TODO: Calculate steering value here, remember the steering value is
-           *   [-1, 1].
-           * NOTE: Feel free to play around with the throttle and speed.
-           *   Maybe use another PID controller to control the speed!
-           */
           
+          // Controller Updates Corrections
+          double steer_value = steering_controller.Update(cte); // between  [-1, 1].
+                  
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
-                    << std::endl;
+          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
+          // Send message back to simulator
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = 0.3;
@@ -75,7 +75,8 @@ int main() {
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
-      } else {
+      } 
+      else {
         // Manual driving
         string msg = "42[\"manual\",{}]";
         ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
