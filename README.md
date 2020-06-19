@@ -3,6 +3,8 @@
 
 ---
 
+NOTE: Feel free to play around with the throttle and speed. Maybe use another PID controller to control the speed. The speed limit is 100mph now.
+
 ## Dependencies
 
 * cmake >= 3.5
