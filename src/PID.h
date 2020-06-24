@@ -20,7 +20,8 @@ class PID {
   void Init(double Kp_, double Ki_, double Kd_);
 
   /**
-   * Updates for the PID error variables given cross track error.
+   * Updates for the PID error variables given the 
+   * difference between actual and desired values (e.g. cross track error).
    * @param cte The current cross track error
    */
   double Update(double cte);
