@@ -1,40 +1,133 @@
 # PID Controller
- PID controller in C++ to maneuver the steering angle of a vehicle around a track. Feedback is provided by the simulator: cross track error (CTE) and the velocity (mph). PID hyperparameters are tuned using a Twiddle Parameter Optimization.
+ PID controller in C++ to correct the steering and throttle of a vehicle around a track. Feedback is provided by the simulator: cross track error (CTE) and the speed (mph). PID parameters are tuned manually by qualitatively inspecting the driving behaviour in the simulator in response to parameter changes. This repo uses [Udacity's CarND-PID-Control-Project repo](https://github.com/udacity/CarND-PID-Control-Project) as a base template and guide.
 
----
+[//]: # (List of Images used in this README.md)
+[image1]: ./README_images/pid_controller.gif "PID Controller"
+[image2]: ./README_images/pid_graph.gif "PID Diagram"
+[image3]: ./README_images/p_control.gif "P Controller"
+[image4]: ./README_images/pd_control.gif "PD Controller"
+[image5]: ./README_images/drift.png "Drift"
+[image6]: ./README_images/pd_drift.gif "PD + Drift"
+[image7]: ./README_images/pid_drift.gif "PID + Drift"
 
-NOTE: Feel free to play around with the throttle and speed. Maybe use another PID controller to control the speed. The speed limit is 100mph now.
+<p align="center"> 
+  ![alt text][image1]
+</p>
 
-## Dependencies
+## Directory Structure
+```
+.PID-Controller
+├── CMakeLists.txt        # Compiler Instructions
+├── cmakepatch.txt        # Sub Dependency for Mac
+├── install-mac.sh        # Dependency for Mac
+├── install-ubuntu.sh     # Dependency for Linux
+├── README.md
+├── README_images         # Images used by README.md
+|   └── ...
+├── build.sh              # Compiles to create a build
+├── run.sh                # Runs the build
+└── src                   # C++ code
+    ├── json.hpp          # json helper functions
+    ├── main.cpp          
+    ├── PID.cpp
+    └── PID.h
+```
+Note: cmakepatch.txt is used by install-mac.sh. 
 
-* cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1(mac, linux), 3.81(Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets 
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
-* Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
+## Installation
+Open your terminal and type:
+```sh
+git clone https://github.com/laygond/PID-Controller.git
+cd PID-Controller
+sudo ./install-ubuntu.sh # (or './install-mac.sh')
+```
+This shell file will install the dependencies for our project
+- cmake >= 3.5
+- make >= 4.1 (Linux, Mac), 3.81 (Windows)
+- gcc/g++ >= 5.4
+- uWebSocketIO  # Allows communication bewtween c++ code and simulator
 
-Fellow students have put together a guide to Windows set-up for the project [here](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/files/Kidnapped_Vehicle_Windows_Setup.pdf) if the environment you have set up for the Sensor Fusion projects does not work for this project. There's also an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3).
+Note: you might need to grant executable permission to the install shell files before running them: `chmod +x install-ubuntu.sh`. Running the install may also need the root permission prefix `sudo`. For Windows set-up and more details go to the 'Dependencies section' from [here]((https://github.com/udacity/CarND-PID-Control-Project)
 
-## Basic Build Instructions
+## Udacity's Simulator
+The simulator can be downloaded [here (Choose latest Term 2 Version)](https://github.com/udacity/self-driving-car-sim/releases). After the simulator is downloaded, make sure it has executable permision: `chmod +x term2_sim.x86_64` (in the case of linux). Several projects come bundled in this simulator release; you must choose PID among the options.
 
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
+## Run Project
+You can either run the following or the simulator first. The order is irrelevant. In terminal go to your PID-Controller repo and type:
+```sh
+./build.sh
+./run.sh
+```
+Note: you might need to `chmod +x` the build and run shell files.
+
+## Project Analysis
+#### Overview
+![Image from Wikipedia: A block diagram of a PID controller in a feedback loop. r(t) is the desired process value or setpoint (SP), and y(t) is the measured process value (PV).][image2]
+
+From the simulator we are constantly measuring
+- CTE  : the cross track error; distance from car to reference
+- Speed: The current speed of the car in mph
+- Angle: The current steering angle of the car
+
+and in order for the car to move and steer we should send to the simulator
+- Steer   : steering angle value between [-1,1]
+- Throttle: throttle value [-1,1]
+where 1 or -1 referes to the max steering angle or max throttle(forward & reverse). For this project the max speed has been raised to 100 mph.
+
+In order to send steering and trottle values that keep the car in the center of the track, two PID controllers have been stablished in `main.cpp`: `speed_controller` and `steering_controller`
+
+<b>The PID controller input</b> is the difference between the desired and actual measurement value. This input is later split into three. 
+- P_error : the current error
+- I_error : the cumulative error
+- D_error : the differential error
+In code it would look like
+```
+  d_error = e - p_error;
+  p_error = e;
+  i_error += e;
+```
+where e is the input difference.
+
+In the case of:
+- speed controller: the reference or desired speed for our vehicle has been set to 30 mph. Therefore the input difference is the (speed - desired).
+- steering controller: the input difference is given directly in the form of CTE. Therefore there is no need to calculate it. In fact, there is no way to calculate it since neither the car's actual pose nor reference to the center of the track are given in map coordinates.
+
+<b>The PID controller output</b> is 
+```
+  return -Kp*p_error - Ki*i_error - Kd*d_error;
+```
+where Kp, Ki, and Kd are the parameters to find such that the desired value is achieved.
+
+#### P Controller
+Let's explore what happens if we were to use only Kp for steering, i.e. Ki and Kd are set to zero.
+
+![alt text][image3]
+
+Once it reaches the reference track the next step will make the car go off track again and be far from the reference. This will continue causing the car to be marginally stable  (bounded oscillations). Therefore the objective is to reach the reference so that the next step also remains in the reference (converges).
+
+#### PD Controller
+![alt text][image4]
+
+PD solves the problem! It makes the car converge but what if there is a systematic bias. Say you believe your wheels are aligned but they are not, now there is a systematic steering drift. This will make it converge at a distance far from the reference.
+
+#### PD Controller + Drift
+![alt text][image5]
+
+The car is slightly to the right of the track. To simulate the drift, 0.05 has been added to the value being sent back to the simulator. 
+
+![alt text][image6]
+
+#### PID Controller + Drift
+
+![alt text][image6]
+
+The PID fixes the systematic bias. You can see how it slightly corrects itself to the center lane as the car advances.
+
+#### Parameter Tuning
+Based on the previous parameter explorations, the PID parameters for the steering controller were tuned manually by qualitatively inspecting the driving behaviour in the simulator in response to parameter changes. The PID parameters for the speed controller were taken from the Behavioral Cloning repo. 
+
+Parameter optimization is possible by defining a loss function which in the case of the steering can be a mean squared error (MSE) of the cte for a time range (tips: omit the first N time steps until controller adjust). In the case of the speed controller you can do the same: an MSE of the input speed difference, however, incorporating cte into this loss function as well seems to be an important indicator since the car might need to slow down while turning. 
+
+Twiddle and SGD are computational methods to find these parameters and definitely better options for tuning than manual tuning. However, I could not find a way from code to reset multiple times the car's pose back to the start in the simulator. Twiddle explore multiple parameters by tweaking them little by little and therefore needs the simulator to run several times. Since most likely the car will crash during the first initial parameter sets a way to reset the car is needed.
 
 
