@@ -6,7 +6,7 @@
 </p>
 
 [//]: # (List of Images used in this README.md)
-[image1]: ./README_images/pid_controller.gif "PID Controller"
+[image1]: ./README_images/pid_sim.png "Simulator"
 [image2]: ./README_images/pid_graph.png "PID Diagram"
 [image3]: ./README_images/p_control.gif "P Controller"
 [image4]: ./README_images/pd_control.gif "PD Controller"
@@ -51,6 +51,9 @@ This shell file will install the dependencies for our project
 Note: you might need to grant executable permission to the install shell files before running them: `chmod +x install-ubuntu.sh`. Running the install may also need the root permission prefix `sudo`. For Windows set-up and more details go to the 'Dependencies section' from [here]((https://github.com/udacity/CarND-PID-Control-Project)
 
 ## Udacity's Simulator
+
+![alt text][image1]
+
 The simulator can be downloaded [here (Choose latest Term 2 Version)](https://github.com/udacity/self-driving-car-sim/releases). After the simulator is downloaded, make sure it has executable permision: `chmod +x term2_sim.x86_64` (in the case of linux). Several projects come bundled in this simulator release; you must choose PID among the options.
 
 ## Run Project
@@ -63,8 +66,6 @@ Note: you might need to `chmod +x` the build and run shell files.
 
 ## Project Analysis
 #### Overview
-![Image from Wikipedia: A block diagram of a PID controller in a feedback loop. r(t) is the desired process value or setpoint (SP), and y(t) is the measured process value (PV).][image2]
-
 From the simulator we are constantly measuring
 - CTE  : the cross track error; distance from car to reference
 - Speed: The current speed of the car in mph
@@ -77,6 +78,11 @@ and in order for the car to move and steer we should send to the simulator
 where 1 or -1 referes to the max steering angle or max throttle(forward & reverse). For this project the max speed has been raised to 100 mph.
 
 In order to send steering and trottle values that keep the car in the center of the track, two PID controllers have been stablished in `main.cpp`: `speed_controller` and `steering_controller`
+
+![alt text][image2]
+<p align="center"> 
+Image from Wikipedia: A block diagram of a PID controller in a feedback loop. r(t) is the desired process value or setpoint (SP), and y(t) is the measured process value (PV).
+</p> 
 
 <b>The PID controller input</b> is the difference between the desired and actual measurement value. This input is later split into three. 
 - P_error : the current error
