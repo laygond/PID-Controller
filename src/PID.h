@@ -22,9 +22,9 @@ class PID {
   /**
    * Updates for the PID error variables given the 
    * difference between actual and desired values (e.g. cross track error).
-   * @param cte The current cross track error
+   * @param e The difference error
    */
-  double Update(double cte);
+  double Update(double e);
 
  private:
   /**

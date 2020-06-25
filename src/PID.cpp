@@ -16,13 +16,13 @@ void PID::Init(double Kp_, double Ki_, double Kd_) {
   d_error = 0.0;
 }
 
-double PID::Update(double cte) {
+double PID::Update(double e) {
   /**
-   * Updates for PID errors based on cte.
+   * Updates for PID errors based on difference error e.
    */
-  d_error = cte - p_error;
-  p_error = cte;
-  i_error += cte;
+  d_error = e - p_error;
+  p_error = e;
+  i_error += e;
 
   return -Kp*p_error - Ki*i_error - Kd*d_error;
 }
