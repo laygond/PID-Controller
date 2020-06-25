@@ -1,18 +1,18 @@
 # PID Controller
  PID controller in C++ to correct the steering and throttle of a vehicle around a track. Feedback is provided by the simulator: cross track error (CTE) and the speed (mph). PID parameters are tuned manually by qualitatively inspecting the driving behaviour in the simulator in response to parameter changes. This repo uses [Udacity's CarND-PID-Control-Project repo](https://github.com/udacity/CarND-PID-Control-Project) as a base template and guide.
 
+<p align="center"> 
+  <img src="./README_images/pid_controller.gif">
+</p>
+
 [//]: # (List of Images used in this README.md)
 [image1]: ./README_images/pid_controller.gif "PID Controller"
-[image2]: ./README_images/pid_graph.gif "PID Diagram"
+[image2]: ./README_images/pid_graph.png "PID Diagram"
 [image3]: ./README_images/p_control.gif "P Controller"
 [image4]: ./README_images/pd_control.gif "PD Controller"
 [image5]: ./README_images/drift.png "Drift"
 [image6]: ./README_images/pd_drift.gif "PD + Drift"
 [image7]: ./README_images/pid_drift.gif "PID + Drift"
-
-<p align="center"> 
-  ![alt text][image1]
-</p>
 
 ## Directory Structure
 ```
@@ -21,6 +21,7 @@
 ├── cmakepatch.txt        # Sub Dependency for Mac
 ├── install-mac.sh        # Dependency for Mac
 ├── install-ubuntu.sh     # Dependency for Linux
+├── .gitignore            # git prevents unnecessary uploads
 ├── README.md
 ├── README_images         # Images used by README.md
 |   └── ...
@@ -72,6 +73,7 @@ From the simulator we are constantly measuring
 and in order for the car to move and steer we should send to the simulator
 - Steer   : steering angle value between [-1,1]
 - Throttle: throttle value [-1,1]
+
 where 1 or -1 referes to the max steering angle or max throttle(forward & reverse). For this project the max speed has been raised to 100 mph.
 
 In order to send steering and trottle values that keep the car in the center of the track, two PID controllers have been stablished in `main.cpp`: `speed_controller` and `steering_controller`
@@ -80,6 +82,7 @@ In order to send steering and trottle values that keep the car in the center of 
 - P_error : the current error
 - I_error : the cumulative error
 - D_error : the differential error
+
 In code it would look like
 ```
   d_error = e - p_error;
@@ -98,36 +101,36 @@ In the case of:
 ```
 where Kp, Ki, and Kd are the parameters to find such that the desired value is achieved.
 
-#### P Controller
+### P Controller
 Let's explore what happens if we were to use only Kp for steering, i.e. Ki and Kd are set to zero.
 
 ![alt text][image3]
 
 Once it reaches the reference track the next step will make the car go off track again and be far from the reference. This will continue causing the car to be marginally stable  (bounded oscillations). Therefore the objective is to reach the reference so that the next step also remains in the reference (converges).
 
-#### PD Controller
+### PD Controller
 ![alt text][image4]
 
 PD solves the problem! It makes the car converge but what if there is a systematic bias. Say you believe your wheels are aligned but they are not, now there is a systematic steering drift. This will make it converge at a distance far from the reference.
 
 #### PD Controller + Drift
-![alt text][image5]
+![alt text][image6]
 
 The car is slightly to the right of the track. To simulate the drift, 0.05 has been added to the value being sent back to the simulator. 
 
-![alt text][image6]
+![alt text][image5]
 
-#### PID Controller + Drift
+### PID Controller + Drift
 
-![alt text][image6]
+![alt text][image7]
 
 The PID fixes the systematic bias. You can see how it slightly corrects itself to the center lane as the car advances.
 
-#### Parameter Tuning
+### Parameter Tuning
 Based on the previous parameter explorations, the PID parameters for the steering controller were tuned manually by qualitatively inspecting the driving behaviour in the simulator in response to parameter changes. The PID parameters for the speed controller were taken from the Behavioral Cloning repo. 
 
 Parameter optimization is possible by defining a loss function which in the case of the steering can be a mean squared error (MSE) of the cte for a time range (tips: omit the first N time steps until controller adjust). In the case of the speed controller you can do the same: an MSE of the input speed difference, however, incorporating cte into this loss function as well seems to be an important indicator since the car might need to slow down while turning. 
 
 Twiddle and SGD are computational methods to find these parameters and definitely better options for tuning than manual tuning. However, I could not find a way from code to reset multiple times the car's pose back to the start in the simulator. Twiddle explore multiple parameters by tweaking them little by little and therefore needs the simulator to run several times. Since most likely the car will crash during the first initial parameter sets a way to reset the car is needed.
 
-
+Another method might be applying a neural network approach and train it with MSE as loss function and SGD as a backpropagation. However, we need a ground truth data of what should be the correct steering values (which we do not have).
