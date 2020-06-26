@@ -48,7 +48,7 @@ This shell file will install the dependencies for our project
 - gcc/g++ >= 5.4
 - uWebSocketIO  # Allows communication bewtween c++ code and simulator
 
-Note: you might need to grant executable permission to the install shell files before running them: `chmod +x install-ubuntu.sh`. Running the install may also need the root permission prefix `sudo`. For Windows set-up and more details go to the 'Dependencies section' from [here]((https://github.com/udacity/CarND-PID-Control-Project)
+Note: you might need to grant executable permission to the install shell files before running them: `chmod +x install-ubuntu.sh`. Running the install may also need the root permission prefix `sudo`. For Windows set-up and more details go to the 'Dependencies section' from [here](https://github.com/udacity/CarND-PID-Control-Project)
 
 ## Udacity's Simulator
 
@@ -67,15 +67,15 @@ Note: you might need to `chmod +x` the build and run shell files.
 ## Project Analysis
 ### Overview
 From the simulator we are constantly measuring
-- CTE  : the cross track error; distance from car to reference
-- Speed: The current speed of the car in mph
-- Angle: The current steering angle of the car
+- CTE  : cross track error; distance from car to reference
+- Speed: current speed of the car in mph
+- Angle: current steering angle of the car
 
 and in order for the car to move and steer we should send to the simulator
 - Steer   : steering angle value between [-1,1]
 - Throttle: throttle value [-1,1]
 
-where 1 or -1 referes to the max steering angle or max throttle(forward & reverse). For this project the max speed has been raised to 100 mph.
+where 1 or -1 referes to the max or min steering angle or throttle (forward & reverse). For this project the max speed has been raised to 100 mph.
 
 In order to send steering and trottle values that keep the car in the center of the track, two PID controllers have been stablished in `main.cpp`: `speed_controller` and `steering_controller`
 
@@ -137,7 +137,7 @@ Based on the previous parameter explorations, the PID parameters for the steerin
 
 |   PID    |   Kp   |   Ki   |   Kd   |
 | -------- | ------ | ------ | ------ |
-| Sterring | 0.14	  | 0.0009 | 1.0    |
+| Steering | 0.14	  | 0.0009 | 1.0    |
 | Speed    | 0.1	  | 0.002	 |	0	    |
 
 Parameter optimization is possible by defining a loss function which in the case of the steering can be a mean squared error (MSE) of the cte for a time range (tips: omit the first N time steps until controller adjust). In the case of the speed controller you can do the same: an MSE of the input speed difference, however, incorporating cte into this loss function as well seems to be an important indicator since the car might need to slow down while turning. 
