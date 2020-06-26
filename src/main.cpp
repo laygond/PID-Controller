@@ -36,7 +36,9 @@ int main() {
 
   // Initialize steering pid object
   PID steering_controller;
-  double steer_Kp = 0.1, steer_Ki = 0.0001, steer_Kd = 1.0;
+  //double steer_Kp = 0.1, steer_Ki = 0.0001, steer_Kd = 1.0;
+//   double steer_Kp = 0.15, steer_Ki = 0.001, steer_Kd = 1.0;
+  double steer_Kp = 0.14, steer_Ki = 0.0009, steer_Kd = 1.0;
   steering_controller.Init(steer_Kp, steer_Ki, steer_Kd);
 
   // Initialize speed pid object
