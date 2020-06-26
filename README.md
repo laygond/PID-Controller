@@ -65,7 +65,7 @@ You can either run the following or the simulator first. The order is irrelevant
 Note: you might need to `chmod +x` the build and run shell files.
 
 ## Project Analysis
-#### Overview
+### Overview
 From the simulator we are constantly measuring
 - CTE  : the cross track error; distance from car to reference
 - Speed: The current speed of the car in mph
@@ -119,7 +119,7 @@ Once it reaches the reference track the next step will make the car go off track
 
 PD solves the problem! It makes the car converge but what if there is a systematic bias. Say you believe your wheels are aligned but they are not, now there is a systematic steering drift. This will make it converge at a distance far from the reference.
 
-#### PD Controller + Drift
+### PD Controller + Drift
 ![alt text][image6]
 
 The car is slightly to the right of the track. To simulate the drift, 0.05 has been added to the value being sent back to the simulator. 
@@ -134,6 +134,11 @@ The PID fixes the systematic bias. You can see how it slightly corrects itself t
 
 ### Parameter Tuning
 Based on the previous parameter explorations, the PID parameters for the steering controller were tuned manually by qualitatively inspecting the driving behaviour in the simulator in response to parameter changes. The PID parameters for the speed controller were taken from the Behavioral Cloning repo. 
+
+|   PID    |   Kp   |   Ki   |   Kd   |
+| -------- | ------ | ------ | ------ |
+| Sterring | 0.14	  | 0.0009 | 1.0    |
+| Speed    | 0.1	  | 0.002	 |	0	    |
 
 Parameter optimization is possible by defining a loss function which in the case of the steering can be a mean squared error (MSE) of the cte for a time range (tips: omit the first N time steps until controller adjust). In the case of the speed controller you can do the same: an MSE of the input speed difference, however, incorporating cte into this loss function as well seems to be an important indicator since the car might need to slow down while turning. 
 
